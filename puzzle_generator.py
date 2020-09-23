@@ -83,10 +83,11 @@ num_count = 0
 
 def fill_board(board):
     """Functions that finds an empty square"""
-    print(9)
     # We are looping through the number 1 to 10.
     # for n in sorted(list(range(1, 10)), key= lambda r: number_in_grid(r)):
+    # List of random numbers which the function will loop through
     list_rands = random.sample(range(1, 10), 9)
+    # Loops through the random list, finding a number which will fit, otherwise it will backtrack.
     for n in list_rands:
         # If the position where the empty number is can hold that number n, then it will set it to n.
         if is_possible(*(find_empty(board)), n, board):
@@ -97,6 +98,7 @@ def fill_board(board):
             grid[y][x] = 0
 
 def fill_9(board):
+    global grid
     """Fills in the first 9 random squares on the board."""
     nums, ys, xs = random.sample(range(1, 10), 9), random.sample(range(9), 9), random.sample(range(9), 9)
     i = 0
@@ -128,19 +130,23 @@ def solution(board):
 def puzzle_maker(difficulty):
     """Function that randomly sets squares on the board to 0, and the number of squares depends on the difficulty
     you set as a argument for the function"""
+    # A list of 81 numbers from 0 - 80, randomly shuffled. Will be used to get y and x coordinates.
     nums_81 = random.sample(range(81), 81)
-    for i in difficulty:
-        for rand in nums_81:
-            # Setting the y and x
+    # Setting n many squares to 0, where n is the difficulty parameter
+    for dif in range(difficulty):
+        # Setting the y and x positions, where y is random number after integer dividing it by 9, leaving the row
+        # number, the x coordinate is the remainder after diving the random number by 9.
+        num = nums_81.pop(5)
+        y, x = num // 9, num % 9
+        # Setting that random square to 0
+        grid[y][x] = 0
+
+def main():
+    """Calls the necessary functions to generate the puzzle, then remove the squares according to difficulty."""
+    fill_9(grid)
+    solution(grid)
+    puzzle_maker(10)
 
 
-
-
-
-fill_9(grid)
-try:
-    fill_board(grid)
-except TypeError:
-    pass
-
-print_board(grid)
+if __name__ == '__main__':
+    main()
