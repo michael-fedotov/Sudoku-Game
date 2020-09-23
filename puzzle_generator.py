@@ -109,10 +109,10 @@ def fill_9(board):
         board[y][x] = num
         i += 1
 
-
-def fill_rest():
-    """Function that will fill in the rest of the board after the first 9 have been filled"""
-    global grid
+#
+# def fill_rest():
+#     """Function that will fill in the rest of the board after the first 9 have been filled"""
+#     global grid
 
 
 def solution(board):
@@ -124,6 +124,14 @@ def solution(board):
     except TypeError:
         pass
     print_board(board)
+
+def puzzle_maker(difficulty):
+    """Function that randomly sets squares on the board to 0, and the number of squares depends on the difficulty
+    you set as a argument for the function"""
+    nums_81 = random.sample(range(81), 81)
+    for i in difficulty:
+        for rand in nums_81:
+            # Setting the y and x
 
 
 
