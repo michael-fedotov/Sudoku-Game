@@ -1,4 +1,8 @@
 import random
+import pygame
+from pygame import mixer
+
+
 # Sample grid
 grid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -130,6 +134,7 @@ def fill_9(board):
 #     """Function that will fill in the rest of the board after the first 9 have been filled"""
 #     global grid
 
+
 def puzzle_maker(difficulty):
     """Function that randomly sets squares on the board to 0, and the number of squares depends on the difficulty
     you set as a argument for the function"""
@@ -147,6 +152,7 @@ def puzzle_maker(difficulty):
         grid_return[y][x] = 0
     return grid_return
 
+
 def difficulty_score(nodes):
     """Function that quantifies the difficulty of the puzzle into a score"""
     # Looping through each nodes in the nodes list
@@ -159,8 +165,10 @@ def difficulty_score(nodes):
             branch_difficulty_score += (branches - 1)**2
     return branch_difficulty_score
 
+
 # List of nodes with branching factors
-list_nodes = [] 
+list_nodes = []
+
 
 def branch_factor(board, node):
     global list_nodes
@@ -184,6 +192,7 @@ def branch_factor(board, node):
             branch_factor(board, node1)
             grid[y][x] = 0
 
+
 def final_puzzle():
     root_node = Node()
     list_nodes.append(root_node)
@@ -193,7 +202,8 @@ def final_puzzle():
         branch_factor(new_grid, root_node)
     except TypeError:
         pass
-    final_difficulty_score = (difficulty_score(list_nodes) * 100 + (81 - num_clues))
+    final_difficulty_score = (difficulty_score(
+        list_nodes) * 100 + (81 - num_clues))
     return final_difficulty_score
 
 
@@ -201,7 +211,7 @@ def solution(board):
     """Prints the solution of the board"""
     # Since the find empty returns False when the board is filled it will raise a TypeError exception, we need to handle
     # it.
-    
+
     try:
         fill_board(board)
     except TypeError:
@@ -209,18 +219,37 @@ def solution(board):
     print_board(board)
 
 
-
-
-
-
-
 def main():
     """Calls the necessary functions to generate the puzzle, then remove the squares according to difficulty."""
-    fill_9(grid)
-    # Creating the root node to track of all the branching factors
-    solution(grid)
-    # difficulty_score(list_nodes)
-    print(final_puzzle())
+    # fill_9(grid)
+    # # Creating the root node to track of all the branching factors
+    # solution(grid)
+    # # difficulty_score(list_nodes)
+    # print(final_puzzle())
+    
+    pygame.init()
+
+# Creating the screen (x, y)
+    screen = pygame.display.set_mode((800, 600))
+    # Loading the image into the my_image variable
+    my_image = pygame.image.load('blank-sudoku-grid.png')
+    running = True
+    while running:
+        screen.fill((0, 0, 0))
+        screen.blit(my_image, (0,0))
+        for event in pygame.event.get():
+            if event == pygame.QUIT:
+                running = False
+
 
 if __name__ == '__main__':
     main()
+
+
+# Starting pygame coding
+
+# Initiallzing pygame
+pygame.init()
+
+# Creating the screen (x, y)
+screen = pygame.display.set_mode((800, 600))
