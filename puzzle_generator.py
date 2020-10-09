@@ -1,4 +1,4 @@
-import random
+import random, sys
 import pygame as pg
 from pygame import mixer
 
@@ -229,24 +229,73 @@ def solution(board):
 
 class Square:
     """Class that will represent a sudoku square and can be filled with a number"""
-    def __init__(self, x, y, w, h, width, num=""):
+    
+    def __init__(self, x, y, w, h, width, num="111"):
         self.rect = pg.Rect(x, y, w, h)
         # When inactive the color will be border of the square
         self.color_inactive = (137, 137, 137)   # (137, 137, 137)
         # When the box is clicked it will change color until enter is pressed or another square is pressed
         self.color_active = (20, 20, 200)
+        # Number that the user places in the square
         self.number = num
-        self.font = pg.font.Font(None, 32)
-        self.txt_surface = self.font.render(num, True, self.color_inactive)
+        # Font object for the text inside
+        self.font_inactive = pg.font.Font(None, 32)
+        # Font object when the text is active
+        self.font_active = pg.font.Font(None, 50)
+        # Text properties for the text, when inactive
+        self.txt_surface_inactive = self.font_inactive.render(num, True, self.color_inactive)
+        # Text properties when active
+        self.txt_surface_active = self.font_active.render(num, True, self.color_active)
         # Square will only be active if it is clicked upon
         self.active = False
         # Width when drawing the lines
         self.width = width
 
+
+    def handle_event(self, event):
+        """Function that handles the event that is occuring, changing the text in the square in different ways."""
+        
+        # Checks if the event is the mouse being pressed down
+        if event.type == pg.MOUSEBUTTONDOWN:
+            # Checks to see if the rectangle was clicked, by checking if the position of the click fall in the 
+            # area of the rect
+            if self.rect.collidepoint(event.pos):   # Checking if pos of event is in the area of the rect.
+                self.active = not self.active   # Setting it to the opposite of the current setting
+            else:
+                # If the mouse is clicked outside of the rectangle then the text is not active
+                self.active = False
+        # If the event is a key being pressed down
+        if event.type == pg.KEYDOWN:
+            # If the text box is active, or the rectangle has been clicked on 
+            if self.active:
+                
+                # If the enter key has been pressed, stored in the event instance attribute key
+                if event.key == pg.K_RETURN:
+                    pass
+                # If backspace is pressed clears the number
+                elif event.key == pg.K_BACKSPACE:
+                    self.number = ""
+                else:
+                    # Checks if it is a nubmer if its not it will pass
+                    try:
+                        int(event.unicode)
+                    except ValueError:
+                        pass
+                    else:
+                        # If the number inputed is an integer
+                        if isinstance(event.unicode, int)
+                            if event.unicode != 0:
+                                self.number = event.unicode
+
+
+                
+
+
     def draw(self, screen):
         """Draws the number in the text box and the box itself"""
-        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        screen.blit(self.txt_surface_inactive, (self.rect.x+5, self.rect.y+5))
         pg.draw.rect(screen, self.color_inactive, self.rect, self.width)
+
 
 
 def create_squares():
@@ -261,9 +310,11 @@ def create_squares():
     for i in range(9):
         y += 55
         x = 4-55
+        squarestemp = []
         for j in range(9):
             x += 55
-            squares.append(Square(x, y, 55, 55, 1))
+            squarestemp.append(Square(x, y, 55, 55, 1))
+        squares.append(squarestemp)
 
     return squares
 
@@ -319,8 +370,9 @@ def main():
         screen.blit(my_image, (0, 0))
 
         # Drawing the squares on the board
-        for square in squares:
-            square.draw(screen)
+        for row in squares:
+            for square in row:
+                square.draw(screen)
 
         # Drawing the lines on the boarders of the puzzle
         for square in squaresx:
@@ -332,7 +384,13 @@ def main():
         for event in pg.event.get():
             # If the event is the quit event then it will exit the program
             if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+
                 running = False
+                
+            
+            # if event.type == 
 
         # Updates the display
         pg.display.update()
