@@ -12,7 +12,7 @@ my_image = pg.image.load('blank-sudoku-grid.png')
 
 
 # Sample grid
-grid = [
+grid1 = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -24,6 +24,17 @@ grid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
 ]
 
+grid = [
+    [8, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 3, 6, 0, 0, 0, 0, 0],
+    [0, 7, 0, 0, 9, 0, 2, 0, 0],
+    [0, 5, 0, 0, 0, 7, 0, 0, 0],
+    [0, 0, 0, 0, 4, 5, 7, 0, 0],
+    [0, 0, 0, 1, 0, 0, 0, 3, 0],
+    [0, 0, 1, 0, 0, 0, 0, 6, 8],
+    [0, 0, 8, 5, 0, 0, 0, 1, 0],
+    [0, 9, 0, 0, 0, 0, 4, 0, 0]
+]
 
 class Node:
     """Creating a node class to keep track of branching factor in the puzzle generatation"""
@@ -230,26 +241,53 @@ def solution(board):
 class Square:
     """Class that will represent a sudoku square and can be filled with a number"""
     
-    def __init__(self, x, y, w, h, width, num="111"):
+    def __init__(self, x, y, w, h, width, num="", isclue=False):
         self.rect = pg.Rect(x, y, w, h)
+
+        # Color attribute, by default set to inactive
+        self.color = (137, 137, 137)
         # When inactive the color will be border of the square
         self.color_inactive = (137, 137, 137)   # (137, 137, 137)
         # When the box is clicked it will change color until enter is pressed or another square is pressed
         self.color_active = (20, 20, 200)
+
         # Number that the user places in the square
         self.number = num
+
+        # Font object, default set to inactive
+        self.font = pg.font.Font(None, 32)
         # Font object for the text inside
         self.font_inactive = pg.font.Font(None, 32)
         # Font object when the text is active
         self.font_active = pg.font.Font(None, 50)
+
+        # Text properties object, default set to inactive
+        self.txt_surface = self.font_inactive.render(self.number, True, self.color)
         # Text properties for the text, when inactive
-        self.txt_surface_inactive = self.font_inactive.render(num, True, self.color_inactive)
+        self.txt_surface_inactive = self.font_inactive.render(self.number, True, self.color_inactive)
         # Text properties when active
-        self.txt_surface_active = self.font_active.render(num, True, self.color_active)
+        self.txt_surface_active = self.font_active.render(self.number, True, self.color_active)
         # Square will only be active if it is clicked upon
         self.active = False
         # Width when drawing the lines
         self.width = width
+
+        # Sets the attribute to wether or not the current square is a clue or not.
+        self.clue = isclue
+
+    def active_changer(self):
+        """Function that changes attributes depending on if active is True or not."""
+        # If active is True it will change all attributes to their active state
+        if self.active:  
+            self.color = self.color_active
+            self.font = self.font_active
+            self.txt_surface = self.txt_surface_active
+
+        # Otherwise if inactive it will set it to inactive
+        else:
+            self.color = self.color_inactive
+            self.font = self.font_inactive
+            self.txt_surface = self.txt_surface_inactive
 
 
     def handle_event(self, event):
@@ -257,23 +295,31 @@ class Square:
         
         # Checks if the event is the mouse being pressed down
         if event.type == pg.MOUSEBUTTONDOWN:
-            # Checks to see if the rectangle was clicked, by checking if the position of the click fall in the 
-            # area of the rect
-            if self.rect.collidepoint(event.pos):   # Checking if pos of event is in the area of the rect.
+            # Checks to see if the rectangle was clicked, by checking if the position of the click falls in the 
+            # parametres of the rectangle. The square must not be a clue for it to be changeable by the user.
+            if self.rect.collidepoint(event.pos) and not self.clue:
                 self.active = not self.active   # Setting it to the opposite of the current setting
+                self.active_changer()    # Changes the instance attributes to their active states
             else:
                 # If the mouse is clicked outside of the rectangle then the text is not active
                 self.active = False
+                self.active_changer()    # Sets the instance attributes to inactive
+                # Renders the text in the inactive mode, making it set 
+                self.txt_surface = self.font.render(self.number, True, self.color)
+
+        
         # If the event is a key being pressed down
         if event.type == pg.KEYDOWN:
             # If the text box is active, or the rectangle has been clicked on 
             if self.active:
-                
                 # If the enter key has been pressed, stored in the event instance attribute key
                 if event.key == pg.K_RETURN:
-                    pass
+                    # If return is pressed then active is set to false, and the active changer changes it
+                    self.active = False
+                    self.active_changer()
                 # If backspace is pressed clears the number
                 elif event.key == pg.K_BACKSPACE:
+                    """If backspace is pressed it clears the square"""
                     self.number = ""
                 else:
                     # Checks if it is a nubmer if its not it will pass
@@ -282,38 +328,54 @@ class Square:
                     except ValueError:
                         pass
                     else:
-                        # If the number inputed is an integer
-                        if isinstance(event.unicode, int)
-                            if event.unicode != 0:
+                        # If the number inputed is an integer, then it will th
+                        if isinstance(int(event.unicode), int):
+                            if event.unicode != "0":    # All numbers but 0, because sudoku is 1-9
                                 self.number = event.unicode
-
-
-                
-
+                # Rendering the text
+                # Only one digit numbers are printed, it is setting the number that is going to be printed 
+                # to the keystroke in the events, so each new keystroke resets the current number to the new 
+                # keystroke.
+                self.txt_surface = self.font.render(self.number, True, self.color)
 
     def draw(self, screen):
         """Draws the number in the text box and the box itself"""
-        screen.blit(self.txt_surface_inactive, (self.rect.x+5, self.rect.y+5))
-        pg.draw.rect(screen, self.color_inactive, self.rect, self.width)
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        pg.draw.rect(screen, self.color, self.rect, self.width)
+
+# def set_square_sudoku(squares, grid):
+#     """Takes a list of square objects, and sets each ones number attribute to the numbers in the sudoku grid.
+#     Each number that is not a zero will be set to each instances number attribute, where 0 is for the user 
+#     to fill"""
 
 
+def create_squares(grid):
+    """Creates a list of row lists of squares. Each square will be a Square object with calculated dimensions
+    and place to be plotted. Each square will have its number attribute set to the corresponding nubmer
+    in the sudoku grid. All non-zero numbers will be immutable squares and the ones were the number attribute
+    is 0 will be mutable by the user."""
 
-def create_squares():
-    """Creates a number of squares that can be drawn"""
     # Empty list of squares
     squares = []
 
     # Intial y value
     y = 4-55
 
-    # Loops through 9 times for each column and 9 times for each row. Each times adding a square object to the list of squares.
+    # Loops through 9 times for each column and 9 times for each row. 
+    # Each times adding a square object to the list of squares.
     for i in range(9):
         y += 55
         x = 4-55
         squarestemp = []
         for j in range(9):
             x += 55
-            squarestemp.append(Square(x, y, 55, 55, 1))
+            sudoku_number = grid[i][j]
+            # Adding the square object with the parametres calculated, wdith and height are standard
+            # the number will be the corresponding number in the sudoku grid.
+            if sudoku_number != 0:  # If the number is not 0 it will be added
+                squarestemp.append(Square(x, y, 55, 55, 1, num=str(sudoku_number), isclue=True))
+            else:   # If the number is 0, it will not be an argument.
+                squarestemp.append(Square(x, y, 55, 55, 1))    
         squares.append(squarestemp)
 
     return squares
@@ -361,7 +423,7 @@ def main():
     # Initiliaze pg
 
     # Creating the squares objects in the board and the border lines to block the grey lines
-    squares = create_squares()
+    squares = create_squares(grid)
     squaresx, squaresy = create_borders()
 
     running = True
@@ -388,7 +450,9 @@ def main():
                 sys.exit()
 
                 running = False
-                
+            for row in squares:
+                for square in row:
+                    square.handle_event(event)
             
             # if event.type == 
 
