@@ -36,6 +36,8 @@ grid = [
     [0, 9, 0, 0, 0, 0, 4, 0, 0]
 ]
 
+
+gridA = grid[:]
 class Node:
     """Creating a node class to keep track of branching factor in the puzzle generatation"""
 
@@ -115,6 +117,19 @@ def is_possible(y, x, num, board):
 
 num_count = 0
 
+def fill_board1(board):
+    """Functions that finds an empty square"""
+    # global num_count
+    # We are looping through the number 1 to 10.
+    # for n in sorted(list(range(1, 10)), key= lambda r: number_in_grid(r)):
+    for n in range(1, 10):
+        # If the position where the empty number is can hold that number n, then it will set it to n.
+        if is_possible(*(find_empty(board)), n, board):
+            y, x = find_empty(board)[0], find_empty(board)[1]
+            # Setting that empty square to 0
+            board[y][x] = n
+            fill_board(board)
+            board[y][x] = 0
 
 def fill_board(board):
     """Functions that finds an empty square"""
@@ -235,7 +250,8 @@ def solution(board):
         fill_board(board)
     except TypeError:
         pass
-    print_board(board)
+    # print_board(board)
+        
 
 
 class Square:
@@ -272,6 +288,9 @@ class Square:
         # Width when drawing the lines
         self.width = width
 
+        # Coordinates of the square
+        self.coords = None
+
         # Sets the attribute to wether or not the current square is a clue or not.
         self.clue = isclue
 
@@ -292,7 +311,7 @@ class Square:
 
     def handle_event(self, event):
         """Function that handles the event that is occuring, changing the text in the square in different ways."""
-        
+        global grid
         # Checks if the event is the mouse being pressed down
         if event.type == pg.MOUSEBUTTONDOWN:
             # Checks to see if the rectangle was clicked, by checking if the position of the click falls in the 
@@ -337,11 +356,44 @@ class Square:
                 # to the keystroke in the events, so each new keystroke resets the current number to the new 
                 # keystroke.
                 self.txt_surface = self.font.render(self.number, True, self.color)
-
+        if not self.clue:
+            y = self.coords[0]
+            x = self.coords[1]
+            if self.number:
+                grid[y][x] = int(self.number)
     def draw(self, screen):
         """Draws the number in the text box and the box itself"""
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
         pg.draw.rect(screen, self.color, self.rect, self.width)
+
+
+class Button(Square):
+    """Class that will represent button objects, like check solution or create new puzzle, 
+    inherets from the square class so its functionality is similar."""
+    def __init__(self, x, y, w, h, width, num="", isclue=False):
+        # Using the inhereted classes init function to initialize the class attributes
+        super().__init__(x, y, w, h, width, num="", isclue=False)
+    
+    def check_solution(self):
+        """Uses the returned solved sudoku board to check if your current solution is valid or not"""
+        global grid
+        gridA = grid[:]     # Creating a copy of the grid we are using
+        solution(gridA)     # Solves the copied board
+        if grid == gridA:
+            print("congrats")
+        else:
+            print('ya')
+
+    def check_event(self, event):
+        # Checking if the button was clicked
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                global grid     # Solves the copied board
+                if grid == gridA:
+                    print("congrats")
+                else:
+                    print('ya')
+
 
 # def set_square_sudoku(squares, grid):
 #     """Takes a list of square objects, and sets each ones number attribute to the numbers in the sudoku grid.
@@ -370,12 +422,18 @@ def create_squares(grid):
         for j in range(9):
             x += 55
             sudoku_number = grid[i][j]
+
             # Adding the square object with the parametres calculated, wdith and height are standard
             # the number will be the corresponding number in the sudoku grid.
             if sudoku_number != 0:  # If the number is not 0 it will be added
                 squarestemp.append(Square(x, y, 55, 55, 1, num=str(sudoku_number), isclue=True))
+                
             else:   # If the number is 0, it will not be an argument.
-                squarestemp.append(Square(x, y, 55, 55, 1))    
+                # Creating the square with the coordinates that it represents on the board
+                square = Square(x, y, 55, 55, 1)
+                square.coords = (i, j)
+                # Adding the square to the list to be added
+                squarestemp.append(square)    
         squares.append(squarestemp)
 
     return squares
@@ -414,7 +472,10 @@ def create_borders():
 
 def main():
     """Calls the necessary functions to generate the puzzle, then remove the squares according to difficulty."""
-
+    # try:
+    #     fill_board1(gridA)
+    # except TypeError:
+    #     pass
     # fill_9(grid)
     # # Creating the root node to track of all the branching factors
     # solution(grid)
@@ -436,6 +497,8 @@ def main():
             for square in row:
                 square.draw(screen)
 
+        check_solution_button = Button(600, 400, 80, 40, 4)
+        check_solution_button.draw(screen)
         # Drawing the lines on the boarders of the puzzle
         for square in squaresx:
             square.draw(screen)
@@ -453,12 +516,11 @@ def main():
             for row in squares:
                 for square in row:
                     square.handle_event(event)
-            
+            check_solution_button.check_event(event)
             # if event.type == 
 
         # Updates the display
         pg.display.update()
-
 
 if __name__ == '__main__':
     main()
