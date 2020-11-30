@@ -1,30 +1,5 @@
-
-""" to do, 
-import solution into board so it can update or check if you have a correct response
-place board to display from generator function
-button to generate new problems
-check button
-make sure each cell can only have one of each number?""" 
-
 import random, sys
-import pygame as pg
-from pygame import mixer
-# from sudoku import solution as sol
-# from sudoku import solution
 
-# Move all functions to other
-# Pull the version where the code worked in solutions and make it generate a puzzle
-# from sudoku import main11
-
-pg.init()
-
-# Creating the screen (x, y)
-screen = pg.display.set_mode((700, 600))
-# Loading the image into the my_image variable
-my_image = pg.image.load('blank-sudoku-grid.png')
-
-# from sudoku import gridA
-# Sample grid
 grid1 = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -168,15 +143,13 @@ def fill_9(board):
     """Fills in the first 9 random squares on the board."""
     nums, ys, xs = random.sample(range(1, 10), 9), random.sample(
         range(9), 9), random.sample(range(9), 9)
-    i = 0
-    while i < 9:
+    for i in range(9):
         # Chooses a random number to put in, and random coordinates
         num = nums.pop()
         y = ys.pop()
         x = xs.pop()
         print(x, y)
         board[y][x] = num
-        i += 1
 
 #
 # def fill_rest():
@@ -485,14 +458,6 @@ def create_borders():
     return squaresx, squaresy
 
 def main():
-    """Calls the necessary functions to generate the puzzle, then remove the squares according to difficulty."""
-    # try:
-    #     fill_board1(gridA)
-    # except TypeError:
-    #     pass
-    
-    # solution(grid)
-    # sol(grid)
     
     fill_9(grid1)
     # # Creating the root node to track of all the branching factors
@@ -501,46 +466,6 @@ def main():
     print_board(grid1)
     # solution(grid1)
     # # difficulty_score(list_nodes)
-    # print(final_puzzle())
-    # Initiliaze pg
-    # Creating the squares objects in the board and the border lines to block the grey lines
-    squares = create_squares(grid1)
-    squaresx, squaresy = create_borders()
-
-    running = True
-    while running:
-        screen.fill((255, 255, 255))
-        screen.blit(my_image, (0, 0))
-
-        # Drawing the squares on the board
-        for row in squares:
-            for square in row:
-                square.draw(screen)
-
-        check_solution_button = Button(600, 400, 80, 40, 4)
-        check_solution_button.draw(screen)
-        # Drawing the lines on the boarders of the puzzle
-        for square in squaresx:
-            square.draw(screen)
-        for square in squaresy:
-            square.draw(screen)
-
-        # Checks each of the events
-        for event in pg.event.get():
-            # If the event is the quit event then it will exit the program
-            if event.type == pg.QUIT:
-                pg.quit()
-                sys.exit()
-
-                running = False
-            for row in squares:
-                for square in row:
-                    square.handle_event(event)
-            check_solution_button.check_event(event)
-            # if event.type == 
-
-        # Updates the display
-        pg.display.update()
 
 if __name__ == '__main__':
     main()
