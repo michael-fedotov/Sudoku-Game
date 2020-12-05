@@ -1,5 +1,6 @@
 import random
 import sys
+import copy
 
 # sample_grid, very difficult puzzle
 sample_grid = [
@@ -164,3 +165,24 @@ def empty_grid_gen():
     except TypeError:
         pass
     return board
+
+
+def puzzle_maker(difficulty):
+    """Function that randomly sets squares on the board to 0, and the number of squares depends on the difficulty
+    you set as a argument for the function"""
+    # Getting a completed sudoku board
+    full_grid = empty_grid_gen()
+    # Creating a copy of the to change it.
+    grid_temp = copy.deepcopy(full_grid)
+    # A list of 81 numbers from 0 - 80, randomly shuffled. Will be used to get y and x coordinates.
+    nums_81 = random.sample(range(81), 81)
+    # Setting n many squares to 0, where n is the difficulty parameter
+    for dif in range(difficulty):
+        # Setting the y and x positions, where y is random number after integer dividing it by 9, leaving the row
+        # number, the x coordinate is the remainder after diving the random number by 9.
+        num = nums_81.pop(5)
+        y, x = num // 9, num % 9
+        # Setting that random square to 0
+        grid_temp[y][x] = 0
+    # Returning both the full grid and puzzle grid
+    return full_grid, grid_temp

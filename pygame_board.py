@@ -52,7 +52,13 @@ grid2 = [
     [0, 0, 8, 0, 0, 0, 0, 4, 0],
 ]
 
+# Make this the generated sudoku puzzle
 grid3 = sudoku_solver.solution(grid2)
+
+# TODO Add a diffuculyy feature??? Where they chose after or at the
+full_solved, grid_gen = sudoku_solver.puzzle_maker(0)
+# print(full_solved)
+# print("\n", grid_gen)
 
 
 grid = [
@@ -105,6 +111,8 @@ class Square:
         self.txt_surface_inactive = self.font_inactive.render(self.number, True, self.color_inactive)
         # Text properties when active
         self.txt_surface_active = self.font_active.render(self.number, True, self.color_active)
+        
+
         # Square will only be active if it is clicked upon
         self.active = False
         # Width when drawing the lines
@@ -131,9 +139,8 @@ class Square:
             self.txt_surface = self.txt_surface_inactive
 
 
-    def handle_event(self, event):
+    def handle_event(self, event, grid):
         """Function that handles the event that is occuring, changing the text in the square in different ways."""
-        global grid
         # Checks if the event is the mouse being pressed down
         if event.type == pg.MOUSEBUTTONDOWN:
             # Checks to see if the rectangle was clicked, by checking if the position of the click falls in the 
@@ -195,20 +202,27 @@ class Button(Square):
     def __init__(self, x, y, w, h, width, num="", isclue=False):
         # Using the inhereted classes init function to initialize the class attributes
         super().__init__(x, y, w, h, width, num="", isclue=False)
+
+        # Text variable for the button
+        self.txt_surface1 = (pg.font.Font(None, 30)).render("CHECK", True, (20, 20, 20))
+        # TODO Next button is going to be a next level
+
     
     def check_solution(self):
         """Uses the returned solved sudoku board to check if your current solution is valid or not"""
-        global grid
+        global full_solved
+        global grid_gen
         # gridA = grid[:]     # Creating a copy of the grid we are using
         # sudoku_solver.solution(gridA)     # Solves the copied board
         # gridA = sudoku_solver.solution(grid2[:])
-        if grid2 == grid3:
+        if grid_gen == full_solved:
             print("congrats")
         else:
             print('ya')
 
     def check_event(self, event):
-        global grid
+        global full_solved
+        global grid_gen
         # Checking if the button was clicked
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
@@ -217,15 +231,18 @@ class Button(Square):
                 #     print("congrats")
                 # else:
                 #     print('ya')
-                global grid
-                gridA = grid[:]     # Creating a copy of the grid we are using
-                # gridtemp = sudoku_solver.solution(grid[:])     # Solves the copied board
-                if grid == grid2:
+                # gridA = grid[:]     # Creating a copy of the grid we are using
+                # # gridtemp = sudoku_solver.solution(grid[:])     # Solves the copied board
+                if grid_gen == full_solved:
                     print("congrats")
                 else:
                     print('ya')
 
-                
+    def draw_button(self,screen ):
+        """Draws the button onto the screen"""
+        # Drawing the button and the text onto the screen
+        screen.blit(self.txt_surface1, (self.rect.x+5, self.rect.y+12))
+        pg.draw.rect(screen, (55, 55, 55), self.rect, self.width)
                 # self.check_solution()
 
 
@@ -305,14 +322,16 @@ def create_borders():
 
 def main():
     """Calls the necessary functions to generate the puzzle, then remove the squares according to difficulty."""
-    # Creating the squares that will be used
-    squares = create_squares(grid1)
+    # Creating the squares that will be used, loading the generated grid
+    squares = create_squares(grid_gen)
     squaresx, squaresy = create_borders()
 
 
 
     running = True
     while running:
+        # sudoku_solver.print_board(grid_gen)
+        # print(grid_gen == full_solved)
         # Adding the background image
         screen.fill((255, 255, 255))
         screen.blit(my_image, (0, 0))
@@ -323,8 +342,8 @@ def main():
                 square.draw(screen)
 
         # 
-        check_solution_button = Button(600, 400, 80, 40, 4)
-        check_solution_button.draw(screen)
+        check_solution_button = Button(550, 400, 80, 40, 4, num="Button")
+        check_solution_button.draw_button(screen)
         # Drawing the lines on the boarders of the puzzle
         for square in squaresx:
             square.draw(screen)
@@ -341,7 +360,7 @@ def main():
                 running = False
             for row in squares:
                 for square in row:
-                    square.handle_event(event)
+                    square.handle_event(event, grid_gen)
             check_solution_button.check_event(event)
             # if event.type == 
 
