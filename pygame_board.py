@@ -8,6 +8,7 @@ make sure each cell can only have one of each number?"""
 
 import random
 import sys
+import time
 import pygame as pg
 from pygame import mixer
 import sudoku_solver
@@ -200,7 +201,7 @@ class Square:
 class Button(Square):
     """Class that will represent button objects, like check solution or create new puzzle,
     inherets from the square class so its functionality is similar."""
-   def __init__(self, x, y, w, h, width, num=""):
+    def __init__(self, x, y, w, h, width, num=""):
         # Creating the rectangle object with user inputs
         self.rect = pg.Rect(x, y, w, h)
         
@@ -208,21 +209,83 @@ class Button(Square):
         self.width = width
         self.height = h
 
+        # Variable to determine if the text showing up is active.
+        self.active = False
+
+
+        # Setting up the fonts where when inactive it does not show up, it is initially inactive.
+        self.font_inactive = pg.font.Font(None, 0)
+        self.font_not_equal_active = pg.font.Font(None, 40)
+        self.font_active = pg.font.Font(None, 40)
+
+        self.text_not_match = "BOARD NOT SOLVED"
+        self.text_match = "YOU HAVE SOLVED THE BOARD"
+        self.text_new_game = "PRESS NEXT TO PLAY NEW PUZZLE"
+
+        # # The variables used in the board
+        # self.font_board_match = self.font_inactive
+        # self.font_board_not_match = self.font_inactive
+
+        # Text surface for the text when you have the correct board or the boards do not match.
+        self.board_not_match_active = self.font_active.render(self.text_not_match, True, (20, 20, 20))
+        self.board_match_active = self.font_active.render(self.text_match, True, (20, 20, 20))
+        self.board_message_next = self.font_active.render(self.text_new_game, True, (20, 20, 20))
+
+        
+        # self.board_not_match_inactive = self.font_inactive.render(self.text_not_match, True, (20, 20, 20))
+        # self.board_match_inactive = self.font_inactive.render(self.text_match, True, (20, 20, 20))
+
+
+        # self.board_not_match = self.board_not_match_inactive
+        # self.board_match = self.board_match_inactive
+
         # Text variable for the button with the font, letters and color.
         self.txt_surface1 = (pg.font.Font(None, 30)).render("CHECK", True, (20, 20, 20))
     
-    def check_solution(self):
-        """Uses the returned solved sudoku board to check if your current solution is valid or not"""
-        global full_solved
-        global grid_gen
-        # gridA = grid[:]     # Creating a copy of the grid we are using
-        # sudoku_solver.solution(gridA)     # Solves the copied board
-        # gridA = sudoku_solver.solution(grid2[:])
-        if grid_gen == full_solved:
-            print("congrats")
-        else:
-            print('ya')
+    
+    
+    # def active_changer1(self):   
+    #     """Function that changes attributes depending on if active is True or not."""
+    #     # If active is True it will change all attributes to their active state
+    #     if self.active == 1:
+    #         # self.color = self.color_active
+    #         self.font_board_match = self.font_active
+    #         self.board_match = self.board_match_active
 
+    #     # Otherwise if inactive it will set it to inactive
+    #     elif self.active == 2:
+    #         # self.color = self.color_inactive
+    #         self.font_board_not_match = self.font_active
+    #         self.board_not_match = self.board_not_match_active
+
+    #     else:
+    #         # Changing them to the inactive font so that the don't show up.
+    #         self.font_board_not_match = self.font_inactive
+    #         self.board_match = self.board_match_active
+    #         self.board_not_match = self.board_not_match_inactive
+
+
+    
+    
+    # def check_solution(self):
+    #     """Uses the returned solved sudoku board to check if your current solution is valid or not"""
+    #     global full_solved
+    #     global grid_gen
+    #     # gridA = grid[:]     # Creating a copy of the grid we are using
+    #     # sudoku_solver.solution(gridA)     # Solves the copied board
+    #     # gridA = sudoku_solver.solution(grid2[:])
+        
+    #     # Always displaying the message until user presses enter.
+    #     if grid_gen == full_solved:
+    #         # Setting the active to True and calling the active changer function
+    #         self.active = True
+    #         active_changer()
+    #     else:
+    #         print('ya')
+
+    
+        
+    
     def check_event(self, event):
         """Function that checks the events and if the mouse is clicked it will check if the fully solved board is the 
         same as the users board, if they are that means the user solved the board."""
@@ -239,15 +302,36 @@ class Button(Square):
                 # gridA = grid[:]     # Creating a copy of the grid we are using
                 # # gridtemp = sudoku_solver.solution(grid[:])     # Solves the copied board
                 if full_solved == grid_gen:
-                    print("congrats")
+                    # If the board is solved it will show the message for the board being solved, self.active = 1
+                    # self.active = 1
+                    # self.active_changer1()
+
+                    # Displaying the text on the board for 3 seconds.
+                    screen.blit(self.board_match_active, (50, 200))
+                    screen.blit(self.board_message_next, (50, 300))
+                    pg.display.update()
+                    time.sleep(5)
                 else:
-                    print('ya')
+                    # If the board is not solved it will show the appropriate message, self.active = 2
+                    # self.active = 2
+                    # self.active_changer1()
+
+                    # Displaying the text on the screen for 3 seconds.
+                    screen.blit(self.board_not_match_active, (200 , 200))
+                    pg.display.update()
+                    time.sleep(3)
+                    # print('ya')
+                    # screen.blit((pg.font.Font(None, 40)).render("PLEASE TRY AGAIN", True, (20, 20, 20)), (100, 100))
 
     def draw_button(self,screen ):
         """Draws the button onto the screen"""
         # Drawing the button and the text onto the screen
         screen.blit(self.txt_surface1, (self.rect.x+5, self.rect.y+12))
         pg.draw.rect(screen, (55, 55, 55), self.rect, self.width)
+        
+        # Drawing the text to show if the board do match or don't
+        # screen.blit(self.board_not_match, (100 , 100))
+        # screen.blit(self.board_match, (50, 50))
                 # self.check_solution()
 
 
@@ -359,7 +443,9 @@ def main_loop():
     # Making those 2 variables global so that we can use them in the main function.
     global full_solved, grid_gen
     # Choses a random difficuly by selecting a random number of squares to remove.
-    full_solved, grid_gen = sudoku_solver.puzzle_maker(random.randint(50,60))
+    # full_solved, grid_gen = sudoku_solver.puzzle_maker(random.randint(50,60))
+    full_solved, grid_gen = sudoku_solver.puzzle_maker(0)
+
 
     
     # Creating the squares that will be used, loading the generated grid
@@ -370,6 +456,8 @@ def main_loop():
     check_solution_button = Button(550, 400, 80, 40, 4, num="Button")
 
     new_puzzle_button = ButtonNextSolution(550, 300, 80, 40, 4, num = "BUTTON")
+
+    
 
     running = True
     while running:
