@@ -1,12 +1,13 @@
 
-""" to do, 
+""" to do,
 import solution into board so it can update or check if you have a correct response
 place board to display from generator function
 button to generate new problems
 check button
-make sure each cell can only have one of each number?""" 
+make sure each cell can only have one of each number?"""
 
-import random, sys
+import random
+import sys
 import pygame as pg
 from pygame import mixer
 import sudoku_solver
@@ -52,11 +53,13 @@ grid2 = [
     [0, 0, 8, 0, 0, 0, 0, 4, 0],
 ]
 
-# Make this the generated sudoku puzzle
-grid3 = sudoku_solver.solution(grid2)
+# # Make this the generated sudoku puzzle
+# grid3 = sudoku_solver.solution(grid2)
 
-# TODO Add a diffuculyy feature??? Where they chose after or at the
-full_solved, grid_gen = sudoku_solver.puzzle_maker(0)
+# Creating the variables for storing the sudoku boards.
+full_solved = None
+grid_gen = None
+
 # print(full_solved)
 # print("\n", grid_gen)
 
@@ -77,14 +80,9 @@ grid = [
 gridA = grid[:]
 
 
-
-
-
-
-
 class Square:
     """Class that will represent a sudoku square and can be filled with a number"""
-    
+
     def __init__(self, x, y, w, h, width, num="", isclue=False):
         self.rect = pg.Rect(x, y, w, h)
 
@@ -106,12 +104,14 @@ class Square:
         self.font_active = pg.font.Font(None, 50)
 
         # Text properties object, default set to inactive
-        self.txt_surface = self.font_inactive.render(self.number, True, self.color)
+        self.txt_surface = self.font_inactive.render(
+            self.number, True, self.color)
         # Text properties for the text, when inactive
-        self.txt_surface_inactive = self.font_inactive.render(self.number, True, self.color_inactive)
+        self.txt_surface_inactive = self.font_inactive.render(
+            self.number, True, self.color_inactive)
         # Text properties when active
-        self.txt_surface_active = self.font_active.render(self.number, True, self.color_active)
-        
+        self.txt_surface_active = self.font_active.render(
+            self.number, True, self.color_active)
 
         # Square will only be active if it is clicked upon
         self.active = False
@@ -127,7 +127,7 @@ class Square:
     def active_changer(self):
         """Function that changes attributes depending on if active is True or not."""
         # If active is True it will change all attributes to their active state
-        if self.active:  
+        if self.active:
             self.color = self.color_active
             self.font = self.font_active
             self.txt_surface = self.txt_surface_active
@@ -138,12 +138,11 @@ class Square:
             self.font = self.font_inactive
             self.txt_surface = self.txt_surface_inactive
 
-
     def handle_event(self, event, grid):
         """Function that handles the event that is occuring, changing the text in the square in different ways."""
         # Checks if the event is the mouse being pressed down
         if event.type == pg.MOUSEBUTTONDOWN:
-            # Checks to see if the rectangle was clicked, by checking if the position of the click falls in the 
+            # Checks to see if the rectangle was clicked, by checking if the position of the click falls in the
             # parametres of the rectangle. The square must not be a clue for it to be changeable by the user.
             if self.rect.collidepoint(event.pos) and not self.clue:
                 self.active = not self.active   # Setting it to the opposite of the current setting
@@ -152,13 +151,13 @@ class Square:
                 # If the mouse is clicked outside of the rectangle then the text is not active
                 self.active = False
                 self.active_changer()    # Sets the instance attributes to inactive
-                # Renders the text in the inactive mode, making it set 
-                self.txt_surface = self.font.render(self.number, True, self.color)
+                # Renders the text in the inactive mode, making it set
+                self.txt_surface = self.font.render(
+                    self.number, True, self.color)
 
-        
         # If the event is a key being pressed down
         if event.type == pg.KEYDOWN:
-            # If the text box is active, or the rectangle has been clicked on 
+            # If the text box is active, or the rectangle has been clicked on
             if self.active:
                 # If the enter key has been pressed, stored in the event instance attribute key
                 if event.key == pg.K_RETURN:
@@ -181,15 +180,17 @@ class Square:
                             if event.unicode != "0":    # All numbers but 0, because sudoku is 1-9
                                 self.number = event.unicode
                 # Rendering the text
-                # Only one digit numbers are printed, it is setting the number that is going to be printed 
-                # to the keystroke in the events, so each new keystroke resets the current number to the new 
+                # Only one digit numbers are printed, it is setting the number that is going to be printed
+                # to the keystroke in the events, so each new keystroke resets the current number to the new
                 # keystroke.
-                self.txt_surface = self.font.render(self.number, True, self.color)
+                self.txt_surface = self.font.render(
+                    self.number, True, self.color)
         if not self.clue:
             y = self.coords[0]
             x = self.coords[1]
             if self.number:
                 grid[y][x] = int(self.number)
+
     def draw(self, screen):
         """Draws the number in the text box and the box itself"""
         screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
@@ -197,16 +198,18 @@ class Square:
 
 
 class Button(Square):
-    """Class that will represent button objects, like check solution or create new puzzle, 
+    """Class that will represent button objects, like check solution or create new puzzle,
     inherets from the square class so its functionality is similar."""
-    def __init__(self, x, y, w, h, width, num="", isclue=False):
-        # Using the inhereted classes init function to initialize the class attributes
-        super().__init__(x, y, w, h, width, num="", isclue=False)
+   def __init__(self, x, y, w, h, width, num=""):
+        # Creating the rectangle object with user inputs
+        self.rect = pg.Rect(x, y, w, h)
+        
+        # Storing the width and the height
+        self.width = width
+        self.height = h
 
-        # Text variable for the button
+        # Text variable for the button with the font, letters and color.
         self.txt_surface1 = (pg.font.Font(None, 30)).render("CHECK", True, (20, 20, 20))
-        # TODO Next button is going to be a next level
-
     
     def check_solution(self):
         """Uses the returned solved sudoku board to check if your current solution is valid or not"""
@@ -221,6 +224,8 @@ class Button(Square):
             print('ya')
 
     def check_event(self, event):
+        """Function that checks the events and if the mouse is clicked it will check if the fully solved board is the 
+        same as the users board, if they are that means the user solved the board."""
         global full_solved
         global grid_gen
         # Checking if the button was clicked
@@ -233,7 +238,7 @@ class Button(Square):
                 #     print('ya')
                 # gridA = grid[:]     # Creating a copy of the grid we are using
                 # # gridtemp = sudoku_solver.solution(grid[:])     # Solves the copied board
-                if grid_gen == full_solved:
+                if full_solved == grid_gen:
                     print("congrats")
                 else:
                     print('ya')
@@ -250,6 +255,35 @@ class Button(Square):
 #     """Takes a list of square objects, and sets each ones number attribute to the numbers in the sudoku grid.
 #     Each number that is not a zero will be set to each instances number attribute, where 0 is for the user 
 #     to fill"""
+
+class ButtonNextSolution:
+    """Class that will represent a button that lets the user generate a new board."""
+    def __init__(self, x, y, w, h, width, num=""):
+        self.rect = pg.Rect(x, y, w, h)
+        self.width = width
+        self.height = h
+        self.txt_surface2 = (pg.font.Font(None, 40)).render("NEW", True, (20, 20, 20))
+
+    def check_event(self, event):
+        """Checks the event in the main loop and if the button is pressed on 
+        then it will create a new puzzle"""
+        global full_solved
+        global grid_gen
+        # Checking if the button was clicked
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                # If the user clicked on to the next puzzle, it will return False breaking the loop, which will then 
+                # break the while loop and generate another board.
+                return False
+        # If there was nothing clicked then return True, keep the loop going.
+        return True
+
+    def draw_button(self,screen ):
+        """Draws the button onto the screen"""
+        # Drawing the button and the text onto the screen
+        screen.blit(self.txt_surface2, (self.rect.x+5, self.rect.y+12))
+        pg.draw.rect(screen, (55, 55, 55), self.rect, self.width)
+                # self.check_solution()
 
 
 def create_squares(grid):
@@ -320,13 +354,22 @@ def create_borders():
 
     return squaresx, squaresy
 
-def main():
+def main_loop():
     """Calls the necessary functions to generate the puzzle, then remove the squares according to difficulty."""
+    # Making those 2 variables global so that we can use them in the main function.
+    global full_solved, grid_gen
+    # Choses a random difficuly by selecting a random number of squares to remove.
+    full_solved, grid_gen = sudoku_solver.puzzle_maker(random.randint(50,60))
+
+    
     # Creating the squares that will be used, loading the generated grid
     squares = create_squares(grid_gen)
     squaresx, squaresy = create_borders()
 
+    # Creating the button that checks the solution.
+    check_solution_button = Button(550, 400, 80, 40, 4, num="Button")
 
+    new_puzzle_button = ButtonNextSolution(550, 300, 80, 40, 4, num = "BUTTON")
 
     running = True
     while running:
@@ -341,9 +384,9 @@ def main():
             for square in row:
                 square.draw(screen)
 
-        # 
-        check_solution_button = Button(550, 400, 80, 40, 4, num="Button")
+        # Drawing the check solution button to the screen.
         check_solution_button.draw_button(screen)
+        new_puzzle_button.draw_button(screen)
         # Drawing the lines on the boarders of the puzzle
         for square in squaresx:
             square.draw(screen)
@@ -362,10 +405,19 @@ def main():
                 for square in row:
                     square.handle_event(event, grid_gen)
             check_solution_button.check_event(event)
-            # if event.type == 
+            # If the button is clicked the loop will be broken and generating a new board
+            running = new_puzzle_button.check_event(event)
+            # check_solution_button.check_event(event,full_solved, grid_gen)
 
-        # Updates the display
+        # Updates the display in each loop
         pg.display.update()
+
+def main():
+    """Main loop"""
+    # While the puzzle is running, 
+    while True:
+        main_loop()
+
 
 if __name__ == '__main__':
     main()
